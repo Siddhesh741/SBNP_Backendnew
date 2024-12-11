@@ -1,0 +1,91 @@
+package com.photoshoot.org.Controller;
+
+import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.photoshoot.org.Entity.Client;
+import com.photoshoot.org.Service.ClientService;
+
+/*import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;*/
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
+
+
+@RestController
+@AllArgsConstructor
+@RequestMapping("api/clients")
+@CrossOrigin("http://localhost:3000") // Add this line
+public class ClientController {
+
+	@Autowired
+	private ClientService clientService;
+	
+	// build create Client REST API
+		/*@PostMapping("/createClient")
+		public ResponseEntity<Client> createClient(@RequestBody Client client) {
+			
+			
+			Client savedClient = clientService.createClient(client);
+			return new ResponseEntity<>(savedClient, HttpStatus.CREATED);
+			
+		}*/
+	   @PostMapping("/createClient")
+	    public ResponseEntity<Client> createClient(@RequestBody Client client) {
+	        String uniqueId = generateUniqueId(); // Generate unique ID
+	        client.setUniqueId(uniqueId); // Set unique ID to the client entity
+	        Client savedClient = clientService.createClient(client); // Save client data
+	        return new ResponseEntity<>(savedClient, HttpStatus.CREATED);
+	    }
+
+	    private String generateUniqueId() {
+	        Random random = new Random();
+	        int id = random.nextInt(90000) + 10000; // Generate random 5-digit number
+	        return String.valueOf(id);
+	    }
+	    
+	    @GetMapping("/byUniqueId/{uniqueId}")
+	    public ResponseEntity<Client> getClientsByUniqueId(@PathVariable("uniqueId") String uniqueId) {
+	        List<Client> clients = clientService.getClientsByUniqueId(uniqueId);
+	        return new ResponseEntity<>(clients, HttpStatus.OK);
+	    }
+		// build get Client by id REST API
+		// http://localhost:8080/api/Clients/1
+		@GetMapping("{id}")
+		public ResponseEntity<Client> getClientById(@PathVariable("id") Long clientId) {
+			Client client = clientService.getClientById(clientId);
+			return new ResponseEntity<>(client, HttpStatus.OK);
+		}
+
+		// Build Get All Clients REST API
+		// http://localhost:8080/api/Clients
+		@GetMapping
+		public ResponseEntity<List<Client>> getAllClients() {
+			List<Client> clients = clientService.getAllClients(); 
+			return new ResponseEntity<>(clients, HttpStatus.OK);
+		}
+
+		// Build Update Client REST API
+		@PutMapping("{id}")
+		// http://localhost:8080/api/Clients/1
+		public ResponseEntity<Client> updateClient(@PathVariable("id") Long clientId, @RequestBody Client client) {
+			client.setId(clientId);
+			Client updatedClient = clientService.updateClient(client);
+			return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+		}
+
+		// Build Delete Client REST API
+		@DeleteMapping("{id}")
+		public ResponseEntity<String> deleteClient(@PathVariable("id") Long clientId) {
+			clientService.deleteClient(clientId);
+			return new ResponseEntity<>("Client successfully deleted!", HttpStatus.OK);
+		}
+		
+	}
